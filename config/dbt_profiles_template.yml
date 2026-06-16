@@ -1,0 +1,15 @@
+# config/dbt_profiles_template.
+
+analytics:
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: your-gcp-project-id
+      dataset: dbt_analytics_dev
+      threads: 4
+      keyfile: path/to/your/gcp-service-account-key.json
+      timeout_seconds: 300
+      priority: interactive
+      retries: 1
+  target: dev
