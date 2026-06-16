@@ -46,3 +46,23 @@ analytic-ingestion-pipeline/
     ├── intermediate/ (int_customer_credit_profile.sql)
     └── marts/        (fct_credit_risk_analytics.sql)
 ```
+
+
+
+## Despliegue en Google Cloud Shell (Bypass de Llaves JSON)
+Para ejecutar este pipeline de dbt directamente en Google Cloud Shell sin lidiar con restricciones de creación de llaves de cuentas de servicio, configura tu archivo `~/.dbt/profiles.yml` de la siguiente manera:
+
+
+```yaml
+analytics:
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: TU_PROJECT_ID_AQUÍ
+      dataset: dbt_staging
+      threads: 4
+      timeout_seconds: 300
+      priority: interactive
+  target: dev
+```
