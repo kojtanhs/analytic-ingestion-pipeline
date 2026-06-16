@@ -1,0 +1,33 @@
+version: 2
+
+sources:
+  - name: raw_synapse
+    description: "Raw relational data extracted from the legacy core credit application databases."
+    tables:
+      - name: tbl_crm_credit_app_raw
+
+models:
+  - name: stg_credit_applications
+    description: "Cleaned and standardized view of raw retail credit applications."
+    columns:
+      - name: credit_application_id
+        description: "Primary key of the credit application."
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "Unique identifier of the customer applying for credit."
+        tests:
+          - not_null
+
+      - name: application_status
+        description: "The current validation phase of the credit application."
+        tests:
+          - accepted_values:
+              values: ['approved', 'rejected', 'pending', 'under_review', 'unknown']
+
+      - name: requested_credit_amount
+        description: "The monetary value requested by the customer in USD."
+        tests:
+          - not_null

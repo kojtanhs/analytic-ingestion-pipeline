@@ -1,0 +1,12 @@
+# dbt specific overrides
+target/
+dbt_packages/
+logs/
+dbt_modules/
+
+# Environment and OS tracking
+.venv/
+kojtan_env/
+__pycache__/
+*.pyc
+.DS_Store
