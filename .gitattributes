@@ -1,0 +1,3 @@
+models/**/*.sql linguist-language=SQL
+
+*.yml linguist-documentation
