@@ -66,3 +66,21 @@ analytics:
       priority: interactive
   target: dev
 ```
+
+
+
+## Data Architecture & Model Variables (Input)
+
+To simulate the retail CRM data ingestion process into BigQuery (`raw_synapse.tbl_crm_credit_app_raw`), the raw source table must contain the following operational and financial variables for the dbt DAG to compile and run successfully:
+
+| Field Name | Data Type | Description | Model Role & Constraints |
+| :--- | :--- | :--- | :--- |
+| `id_app` | `STRING` | Unique identifier for the credit application | Primary Key (Enforced via Uniqueness & Not-Null tests) |
+| `cod_cli` | `STRING` | Unique customer identification code | Partitioning/Granularity key for analytical window functions |
+| `amt_req` | `FLOAT64` | Total credit amount requested by the customer | Quantitative metric (Enforced via custom Positive Value test) |
+| `val_income` | `FLOAT64` | Customer's verified or declared monthly income | Financial metric used to evaluate repayment capacity |
+| `pct_debt_ratio`| `FLOAT64` | Prior Debt-to-Income (DTI) ratio (0.00 to 1.00) | Core credit risk metric for leverage analysis |
+| `cod_store` | `STRING` | Operational code of the brick-and-mortar retail branch | Operational dimension used for regional segmentation |
+| `txt_prod_cat` | `STRING` | Commercial category of the product to be financed | Commercial dimension (e.g., Electronics, Motocycles, Appliances) |
+| `dt_created` | `STRING` | Timestamp of the application submission | Temporal dimension for trend and cohort analysis |
+| `status_op` | `STRING` | Transaction operational status (APPROVED, REJECTED, PENDING) | Transaction status (Enforced via Accepted Values test) |
