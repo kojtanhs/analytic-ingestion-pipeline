@@ -24,18 +24,17 @@ def create_executive_pdf():
     print("  Pulling clean metrics from fct_credit_risk_analytics...")
     df = client.query(query).to_dataframe()
     
-    # Calcular métricas operacionales reales
+    # real metrics
     total_apps = int(len(df))
     approved_amt = float(df[df['application_status'] == 'APPROVED']['requested_credit_amount'].sum())
     rejected_amt = float(df[df['application_status'] == 'REJECTED']['requested_credit_amount'].sum())
     avg_income = float(df['declared_monthly_income'].mean())
     avg_dti = float(df['monthly_debt_ratio'].mean())
     
-    # Ajustar porcentaje de DTI si viene en formato decimal (ej: 0.45 -> 45.0)
+    # DTI fit (ie: 0.45 -> 45.0)
     if avg_dti < 1.0:
         avg_dti = avg_dti * 100
 
-    # Separamos el CSS en bloques limpios para evitar conflicto de llaves {}
     css_styles = """
         @page { size: A4; margin: 20mm 15mm; background-color: #ffffff; }
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #2d3748; margin: 0; padding: 0; font-size: 11pt; line-height: 1.6; }
@@ -52,7 +51,6 @@ def create_executive_pdf():
         li { margin-bottom: 10px; }
     """
 
-    # Construimos el esqueleto HTML inyectando las variables de forma segura con .format()
     html_template = """
     <!DOCTYPE html>
     <html>
@@ -115,7 +113,6 @@ def create_executive_pdf():
     </html>
     """
     
-    # Inyección explícita sin interferencia de llaves de CSS
     html_content = html_template.format(
         styles=css_styles,
         user=current_user,
