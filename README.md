@@ -4,7 +4,7 @@ A production-grade dbt (Data Build Tool) repository designed to orchestrate an E
 
 ## Pipeline Architecture and Data Flow
 
-The analytical ingestion pipeline follows a strict ELT (Extract-Load-Transform) paradigm structured via a multi-layered medallion architecture. Raw operational data is transformed into partitioned, query-optimized analytical datasets within the warehouse environment.
+The analytical ingestion pipeline follows a strict ELT (Extract-Load-Transform) paradigm structured via a multi-layered medallion architecture. Raw operational data is generated and streamed dynamically to simulate severe market volatility before undergoing modular multi-stage refinement.
 
 ```mermaid
 graph LR
@@ -13,7 +13,7 @@ graph LR
     classDef intermediate fill:#1f4068,stroke:#f1c40f,stroke-width:2px,color:#fff;
     classDef marts fill:#0f3460,stroke:#27ae60,stroke-width:2px,color:#fff;
 
-    A[Raw Operational SQL: Credit Applications & Retail Transactions] -->|Direct Load| B[Staging Layer: stg_credit_applications.sql]
+    A[Python Simulator: simulate_risk_crisis.py] -->|Direct Bulk Load| B[Staging Layer: stg_credit_applications.sql]
     class A source;
     class B staging;
 
