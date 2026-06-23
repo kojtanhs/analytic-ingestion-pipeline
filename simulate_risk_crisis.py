@@ -5,22 +5,22 @@ import random
 from datetime import datetime, timedelta
 
 def inject_massive_risk_data():
-    # 1. Definición explícita de variables al inicio de la función
+    # 1. Pipeline configuration and target table definitions
     project_id = "project-6ec21dbe-fdf3-4e8d-bb6"
     dataset_id = "raw_synapse"
     table_id = "tbl_crm_credit_app_raw"
     
-    # Inicializamos el cliente amarrado al proyecto
+    # Explicitly bind client to target project to avoid URL formatting issues
     client = bigquery.Client(project=project_id)
     
     records = 1000
     print(f"  Generating {records} simulated credit applications for risk stress testing...")
     
-    # Generar fechas aleatorias dentro de las últimas 48 horas
+    # Generate randomized application timestamps within the last 48 hours
     base_date = datetime.now()
     dates = [base_date - timedelta(minutes=random.randint(0, 2880)) for _ in range(records)]
     
-    # 70% de probabilidad de crisis (alto riesgo), 30% sano
+    # Establish a high-stress distribution: 70% high-risk (crisis), 30% low-risk (healthy)
     is_crisis = np.random.choice([True, False], size=records, p=[0.7, 0.3])
     
     amt_req = []
@@ -30,19 +30,19 @@ def inject_massive_risk_data():
     
     for crisis in is_crisis:
         if crisis:
-            # CRISIS: Bajos ingresos, deudas infladas y montos altos
+            # CRISIS: Low income, elevated debt ratios, and high loan requests
             amt_req.append(round(random.uniform(5000, 15000), 2))
             val_income.append(round(random.uniform(400, 800), 2))
             pct_debt_ratio.append(round(random.uniform(0.65, 0.95), 2))
             status_op.append('REJECTED')
         else:
-            # SANO: Ingresos estables, baja deuda y montos moderados
+            # HEALTHY: Stable income, conservative debt, and moderate loan requests
             amt_req.append(round(random.uniform(500, 2000), 2))
             val_income.append(round(random.uniform(1200, 3500), 2))
             pct_debt_ratio.append(round(random.uniform(0.10, 0.40), 2))
             status_op.append('APPROVED')
 
-    # Estructurar el DataFrame para BigQuery
+    # Construct DataFrame aligning with the upstream dbt schema contract
     df = pd.DataFrame({
         'id_app': [f"APP-{100000 + i}" for i in range(records)],
         'cod_cli': [f"CLI-{random.randint(50000, 99999)}" for i in range(records)],
@@ -55,13 +55,13 @@ def inject_massive_risk_data():
         'pct_debt_ratio': pct_debt_ratio
     })
 
-    # Construcción directa de la referencia de la tabla usando strings limpios
+    # Define absolute table destination string
     table_ref = f"{project_id}.{dataset_id}.{table_id}"
     job_config = bigquery.LoadJobConfig(write_disposition="WRITE_TRUNCATE")
     
     print(f"  Uploading raw chaotic data stream to BigQuery: {table_ref}...")
     
-    # Inyección limpia
+    # Execute synchronous dataframe streaming to BigQuery landing zone
     client.load_table_from_dataframe(
         df, 
         table_ref, 
