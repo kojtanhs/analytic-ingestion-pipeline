@@ -4,7 +4,8 @@ import pandas as pd
 import os
 
 def create_executive_pdf():
-    client = bigquery.Client()
+    # Inicialización forzada del cliente con el ID de tu proyecto para evitar //
+    client = bigquery.Client(project="project-6ec21dbe-fdf3-4e8d-bb6")
     
     try:
         current_user = os.getlogin()
@@ -24,17 +25,24 @@ def create_executive_pdf():
     print("  Pulling clean metrics from fct_credit_risk_analytics...")
     df = client.query(query).to_dataframe()
     
-    # real metrics
+    # 1. Asegurar que los estados estén en texto limpio, sin espacios y en mayúsculas
+    df['application_status'] = df['application_status'].astype(str).str.strip().str.upper()
+    
+    # 2. Asegurar que los montos sean interpretados como números reales (float)
+    df['requested_credit_amount'] = pd.to_numeric(df['requested_credit_amount'], errors='coerce').fillna(0)
+
+    # 3. Mapeo y cálculo seguro de las métricas sobre el DataFrame
     total_apps = int(len(df))
     approved_amt = float(df[df['application_status'] == 'APPROVED']['requested_credit_amount'].sum())
     rejected_amt = float(df[df['application_status'] == 'REJECTED']['requested_credit_amount'].sum())
     avg_income = float(df['declared_monthly_income'].mean())
     avg_dti = float(df['monthly_debt_ratio'].mean())
     
-    # DTI fit (ie: 0.45 -> 45.0)
+    # Ajustar porcentaje de DTI si viene en formato decimal (ej: 0.62 -> 62.0%)
     if avg_dti < 1.0:
         avg_dti = avg_dti * 100
 
+    # Separamos el CSS en bloques limpios para evitar conflicto de llaves {}
     css_styles = """
         @page { size: A4; margin: 20mm 15mm; background-color: #ffffff; }
         body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #2d3748; margin: 0; padding: 0; font-size: 11pt; line-height: 1.6; }
@@ -51,6 +59,7 @@ def create_executive_pdf():
         li { margin-bottom: 10px; }
     """
 
+    # Construimos el esqueleto HTML inyectando las variables de forma segura con .format()
     html_template = """
     <!DOCTYPE html>
     <html>
@@ -113,6 +122,7 @@ def create_executive_pdf():
     </html>
     """
     
+    # Inyección explícita sin interferencia de llaves de CSS
     html_content = html_template.format(
         styles=css_styles,
         user=current_user,
